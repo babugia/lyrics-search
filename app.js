@@ -34,8 +34,11 @@ const insertSongsIntoPage = songsInfo => {
   const { data, prev, next } = songsInfo;
   songsContainer.innerHTML = data
     .map(
-      ({ artist: { name }, title }) => `
+      ({ artist: { name }, title, preview }) => `
     <li class="song">
+    <audio controls>
+      <source src="${preview}" />
+    </audio>
       <span class="song-artist"><strong>${name}</strong> - ${title}</span>
       <button class="btn" data-artist="${name}" data-song-title="${title}">Ver letra</button>
     </li>

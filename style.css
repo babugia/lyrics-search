@@ -99,8 +99,9 @@ form button {
   list-style-type: none;
   padding: 0;
   margin: 30px auto;
-  max-width: 100%;
-  width: 500px;
+  max-width: 800px;
+  min-width: 500px;
+  width: 100%;
   background-color: #10161b;
 }
 
