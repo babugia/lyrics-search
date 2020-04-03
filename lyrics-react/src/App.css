@@ -36,6 +36,7 @@ header * {
 
 header h1 {
   margin: 0 0 30px;
+  mix-blend-mode: screen;
 }
 
 form {
@@ -78,6 +79,7 @@ form button {
   margin: 30px auto;
   max-width: 800px;
   min-width: 500px;
+  min-height: 37rem;
   width: 100%;
   background-color: #10161b;
 }
@@ -116,6 +118,7 @@ form button {
 
 .lyrics-container {
   color: white;
+  text-align: center;
   opacity: 0.4;
 }
 

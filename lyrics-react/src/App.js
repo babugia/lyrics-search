@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { css } from '@emotion/core';
 import FadeLoader from 'react-spinners/FadeLoader';
 import api from './services/api';
@@ -20,13 +20,19 @@ function App() {
   const [title, setTitle] = useState('');
   const [next, setNext] = useState('');
   const [prev, setPrev] = useState('');
+  const [notFound, setNotFound] = useState(false);
 
   const fetchSongs = async () => {
     const trimmedInput = searchInput.trim();
     if (trimmedInput) {
       setLoading(true);
       const response = await api.get(`suggest/${trimmedInput}`);
-      setSongs(response.data);
+      if (response.data.total > 0) {
+        setSongs(response.data);
+        setNotFound(false);
+      } else {
+        setNotFound(true);
+      }
       setSearchInput('');
       response.data.next ? setNext(response.data.next) : setNext('');
       response.data.prev ? setPrev(response.data.prev) : setPrev('');
@@ -35,6 +41,7 @@ function App() {
   };
 
   const getMoreSongs = async url => {
+    setLyrics('');
     setSongs([]);
     setLoading(true);
     const response = await api.get(
@@ -51,10 +58,11 @@ function App() {
 
   const handleFormSubmit = event => {
     event.preventDefault();
+    setLyrics('');
     fetchSongs();
   };
 
-  const handleVerLetraClick = async ({ name, title }) => {
+  const getLyrics = async (name, title) => {
     setLoading(true);
     const response = await api.get(`v1/${name}/${title}`);
     const {
@@ -73,79 +81,132 @@ function App() {
     setLoading(false);
   };
 
-  const gamb = text => {
+  const formatadLyrics = text => {
     if (!text) return <br></br>;
     return text;
   };
 
+  const renderLoader = () => {
+    return loading ? (
+      <FadeLoader
+        css={loadingStyle}
+        size={150}
+        color={'#8d56fd'}
+        loading={loading}
+      />
+    ) : (
+      <Fragment />
+    );
+  };
+
+  const renderNotFoundMessage = () => {
+    return notFound ? (
+      <h3 className='warning-message'>
+        Nenhuma música encontrada, tente novamente!
+      </h3>
+    ) : (
+      <Fragment />
+    );
+  };
+  const renderSearchSongInput = () => (
+    <input
+      id='search'
+      type='text'
+      value={searchInput}
+      onChange={evt => setSearchInput(evt.target.value)}
+      placeholder='Insira o nome do artista ou da música...'
+    />
+  );
+
+  const renderLyricsButton = (artistName, songTitle) => (
+    <button className='btn' onClick={() => getLyrics(artistName, songTitle)}>
+      Ver letra
+    </button>
+  );
+
+  const renderSongName = (artistName, songTitle) => (
+    <span className='song-artist'>
+      <strong>{artistName}</strong> - {songTitle}
+    </span>
+  );
+
+  const renderSongRow = (artistName, songTitle, index) => {
+    return (
+      <li key={index} className='song'>
+        {renderSongName(artistName, songTitle)}
+        {renderLyricsButton(artistName, songTitle)}
+      </li>
+    );
+  };
+
+  const renderPrevButton = () => {
+    return prev ? (
+      <button className='btn' onClick={() => getMoreSongs(prev)}>
+        Anteriores
+      </button>
+    ) : (
+      <Fragment />
+    );
+  };
+
+  const renderNextButton = () => {
+    return next ? (
+      <button className='btn' onClick={() => getMoreSongs(next)}>
+        Próximas
+      </button>
+    ) : (
+      <Fragment />
+    );
+  };
+
+  const renderLyrics = () => {
+    return lyrics ? (
+      <li className='lyrics-container'>
+        <h2>
+          <strong>{title}</strong> - {name}
+        </h2>
+        <div className='lyrics'>
+          {lyrics.split('\n').map((text, index) => (
+            <p key={index}>{formatadLyrics(text)}</p>
+          ))}
+        </div>
+      </li>
+    ) : (
+      <Fragment />
+    );
+  };
+
   return (
-    <>
+    <Fragment>
       <header>
         <h1>Buscar letras</h1>
         <form id='form' onSubmit={handleFormSubmit}>
-          <input
-            id='search'
-            type='text'
-            value={searchInput}
-            onChange={evt => setSearchInput(evt.target.value)}
-            placeholder='Insira o nome do artista ou da música...'
-          />
+          {renderSearchSongInput()}
           <button>Buscar</button>
         </form>
       </header>
       <ul className='songs-container songs'>
-        {loading && (
-          <FadeLoader
-            css={loadingStyle}
-            size={150}
-            color={'#8d56fd'}
-            loading={loading}
-          />
-        )}
+        {renderNotFoundMessage()}
+        {renderLoader()}
         {songs.data && !loading
-          ? songs.data.map(({ artist: { name }, title }, index) => (
-              <li key={index} className='song'>
-                <span className='song-artist'>
-                  <strong>{name}</strong> - {title}
-                </span>
-                <button
-                  className='btn'
-                  onClick={() => handleVerLetraClick({ name, title })}
-                >
-                  Ver letra
-                </button>
-              </li>
-            ))
-          : lyrics && (
-              <li className='lyrics-container'>
-                <h2>
-                  <strong>{title}</strong> - {name}
-                </h2>
-                <div className='lyrics'>
-                  {lyrics.split('\n').map((text, index) => (
-                    <p key={index}>{gamb(text)}</p>
-                  ))}
-                </div>
-              </li>
-            )}
+          ? songs.data.map(({ artist: { name }, title }, index) =>
+              renderSongRow(name, title, index)
+            )
+          : renderLyrics()}
         }
       </ul>
+
       <div className='prev-and-next-container'>
-        {prev && (
-          <button className='btn' onClick={() => getMoreSongs(prev)}>
-            Anteriores
-          </button>
-        )}
-        {next && (
-          <button className='btn' onClick={() => getMoreSongs(next)}>
-            Próximas
-          </button>
-        )}
+        {renderPrevButton()}
+        {renderNextButton()}
       </div>
-    </>
+    </Fragment>
   );
 }
 
 export default App;
 
 // TODO: refactor this shit, search how to use new features from ES2020
+// TODO: add routes? one for searched song rendering the list or warning message
+// one for lyrics, this without prev and next buttons and with a back button
+// TODO: check when getLyrics return 404, ex: VXCVxc, try catch?
