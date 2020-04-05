@@ -35,13 +35,13 @@ header h1 {
   mix-blend-mode: screen;
 }
 
-form {
+.header-container {
   position: relative;
   width: 500px;
   max-width: 100%;
 }
 
-form input {
+.header-container input {
   border: 0;
   border-radius: 50px;
   font-size: 16px;
@@ -49,7 +49,7 @@ form input {
   width: 100%;
 }
 
-form button {
+.header-container button {
   position: absolute;
   top: 2px;
   right: 2px;

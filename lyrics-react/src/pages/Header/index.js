@@ -1,23 +1,11 @@
-import React, { useState, useContext, memo } from 'react';
+import React, { useState, memo } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { MyContext, types } from '../../App';
 
 import './styles.css';
 
-export default memo(function Header() {
-  const { dispatch } = useContext(MyContext);
+const Header = () => {
   const [searchInput, setSearchInput] = useState('');
   const history = useHistory();
-
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
-    dispatch({
-      type: types.searchedSong,
-      payload: { song: searchInput.trim() },
-    });
-    // TODO: use <Link to='/songs/:${searchInput.trim()} />', and remove this action from redux
-    history.push('songs');
-  };
 
   const renderSearchSongInput = () => (
     <input
@@ -29,13 +17,23 @@ export default memo(function Header() {
     />
   );
 
+  const handleKeyPress = (target) => {
+    if (target.charCode == 13) {
+      history.push(`/songs/${searchInput.trim()}`);
+    }
+  };
+
   return (
     <header>
       <h1>Buscar letras</h1>
-      <form id='form' onSubmit={handleFormSubmit}>
+      <div className='header-container' onKeyPress={(e) => handleKeyPress(e)}>
         {renderSearchSongInput()}
-        <button>Buscar</button>
-      </form>
+        <Link to={`/songs/${searchInput.trim()}`}>
+          <button>Buscar</button>
+        </Link>
+      </div>
     </header>
   );
-});
+};
+
+export default memo(Header);

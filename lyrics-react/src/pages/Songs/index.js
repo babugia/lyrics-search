@@ -5,11 +5,12 @@ import { MyContext, types } from '../../App';
 import Loader from '../../utils/components/Loader';
 import './styles.css';
 
-export default memo(function Songs() {
+const Songs = () => {
   const { state, dispatch } = useContext(MyContext);
+  const { song: searchedSong } = useParams();
   const [showWarningMessage, setShowWarningMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const { searchedSong, songs, prev, next, loading } = state;
+  const { songs, prev, next, loading } = state;
 
   const getMoreSongs = async (url) => {
     setShowWarningMessage(false);
@@ -40,15 +41,12 @@ export default memo(function Songs() {
           : setShowWarningMessage(true);
       }
     } catch (error) {
-      console.log({ error });
-      console.log('setar loading false, e mostrar erro');
       setShowErrorMessage(true);
       dispatch({ type: types.loading, payload: false });
     }
   };
 
   useEffect(() => {
-    console.log({ searchedSong });
     if (searchedSong) fetchSongs();
   }, [searchedSong]);
 
@@ -124,4 +122,6 @@ export default memo(function Songs() {
       )}
     </Fragment>
   );
-});
+};
+
+export default memo(Songs);

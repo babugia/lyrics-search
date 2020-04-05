@@ -10,7 +10,7 @@ export default function Routes() {
       <div>
         <Header />
         <Switch>
-          <Route path='/songs' exact component={Songs} />
+          <Route path='/songs/:song' exact component={Songs} />
           {/* <Route path='/incidents/new' component={NewIncident} /> */}
         </Switch>
       </div>

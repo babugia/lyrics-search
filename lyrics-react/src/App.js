@@ -16,11 +16,6 @@ const reducer = (state, action) => {
   switch (type) {
     case types.loading:
       return { ...state, loading: payload };
-    case types.searchedSong:
-      return {
-        ...state,
-        searchedSong: payload.song,
-      };
     case types.songs:
       return {
         ...state,
@@ -46,7 +41,6 @@ export const MyContext = React.createContext();
 function MyProvider({ children }) {
   const [state, dispatch] = React.useReducer(reducer, {
     loading: false,
-    searchedSong: '',
     prev: '',
     next: '',
     songs: [],
@@ -74,10 +68,6 @@ function App() {
   const [next, setNext] = useState('');
   const [prev, setPrev] = useState('');
   const [notFound, setNotFound] = useState(false);
-
-  useEffect(() => {
-    localStorage.clear();
-  }, []);
 
   const fetchSongs = async () => {
     const trimmedInput = searchInput.trim();
