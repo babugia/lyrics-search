@@ -1,0 +1,43 @@
+.songs-container {
+  list-style-type: none;
+  padding: 0;
+  margin: 30px auto;
+  max-width: 800px;
+  min-width: 500px;
+  min-height: 37rem;
+  width: 100%;
+  background-color: #10161b;
+}
+
+.buttons-container {
+  padding-bottom: 1rem;
+  text-align: center;
+}
+
+.btn {
+  background-color: #8d56fd;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  margin-left: 1rem;
+  padding: 4px 10px;
+}
+
+.song {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+
+.warning-message {
+  color: #ea2234;
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.song-artist {
+  color: white;
+  opacity: 0.4;
+  max-width: 400px;
+}

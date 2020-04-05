@@ -1,15 +1,68 @@
-import React, { useState, Fragment } from 'react';
-import { css } from '@emotion/core';
-import FadeLoader from 'react-spinners/FadeLoader';
+import React, { useState, Fragment, useEffect, memo } from 'react';
 import api from './services/api';
+import Routes from './routes';
 import './global.css';
 import './App.css';
 
-const loadingStyle = css`
-  display: block;
-  margin: 0 auto;
-  border-color: red;
-`;
+export const types = {
+  loading: 'LOADING',
+  songs: 'SONGS_FETCHED',
+  searchedSong: 'SEARCHED_SONG',
+  cleanLyrics: 'CLEAN_LYRICS_PAGE',
+};
+
+const reducer = (state, action) => {
+  const { type, payload } = action;
+  switch (type) {
+    case types.loading:
+      return { ...state, loading: payload };
+    case types.searchedSong:
+      return {
+        ...state,
+        searchedSong: payload.song,
+      };
+    case types.songs:
+      return {
+        ...state,
+        loading: false,
+        songs: payload.newSongs,
+        prev: payload.prev,
+        next: payload.next,
+      };
+    case types.cleanLyrics:
+      return {
+        ...state,
+        artistName: '',
+        songTitle: '',
+        lyrics: '',
+      };
+    default:
+      return { ...state };
+  }
+};
+
+export const MyContext = React.createContext();
+
+function MyProvider({ children }) {
+  const [state, dispatch] = React.useReducer(reducer, {
+    loading: false,
+    searchedSong: '',
+    prev: '',
+    next: '',
+    songs: [],
+    artistName: '',
+    songTitle: '',
+    lyrics: '',
+  });
+
+  return (
+    <MyContext.Provider value={{ state, dispatch }}>
+      {children}
+    </MyContext.Provider>
+  );
+}
+
+//
 
 function App() {
   const [searchInput, setSearchInput] = useState('');
@@ -21,6 +74,10 @@ function App() {
   const [next, setNext] = useState('');
   const [prev, setPrev] = useState('');
   const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    localStorage.clear();
+  }, []);
 
   const fetchSongs = async () => {
     const trimmedInput = searchInput.trim();
@@ -40,7 +97,7 @@ function App() {
     }
   };
 
-  const getMoreSongs = async url => {
+  const getMoreSongs = async (url) => {
     setLyrics('');
     setSongs([]);
     setLoading(true);
@@ -56,7 +113,7 @@ function App() {
     setLoading(false);
   };
 
-  const handleFormSubmit = event => {
+  const handleFormSubmit = (event) => {
     event.preventDefault();
     setLyrics('');
     fetchSongs();
@@ -64,16 +121,19 @@ function App() {
 
   const getLyrics = async (name, title) => {
     setLoading(true);
-    const response = await api.get(`v1/${name}/${title}`);
-    const {
-      data: { lyrics }
-    } = response;
-    if (lyrics) {
-      setLyrics(lyrics);
-      setName(name);
-      setTitle(title);
-      setSongs([]);
-    } else {
+    try {
+      const response = await api.get(`v1/${name}/${title}`);
+      const {
+        data: { lyrics },
+      } = response;
+      if (lyrics) {
+        setLyrics(lyrics);
+        setName(name);
+        setTitle(title);
+        setSongs([]);
+      }
+    } catch (err) {
+      alert('Letra não encontrada...');
       setLyrics('');
       setName('');
       setTitle('');
@@ -81,39 +141,17 @@ function App() {
     setLoading(false);
   };
 
-  const formatadLyrics = text => {
+  const formatadLyrics = (text) => {
     if (!text) return <br></br>;
     return text;
   };
 
-  const renderLoader = () => {
-    return loading ? (
-      <FadeLoader
-        css={loadingStyle}
-        size={150}
-        color={'#8d56fd'}
-        loading={loading}
-      />
-    ) : (
-      <Fragment />
-    );
-  };
-
-  const renderNotFoundMessage = () => {
-    return notFound ? (
-      <h3 className='warning-message'>
-        Nenhuma música encontrada, tente novamente!
-      </h3>
-    ) : (
-      <Fragment />
-    );
-  };
   const renderSearchSongInput = () => (
     <input
       id='search'
       type='text'
       value={searchInput}
-      onChange={evt => setSearchInput(evt.target.value)}
+      onChange={(evt) => setSearchInput(evt.target.value)}
       placeholder='Insira o nome do artista ou da música...'
     />
   );
@@ -177,36 +215,38 @@ function App() {
   };
 
   return (
-    <Fragment>
-      <header>
-        <h1>Buscar letras</h1>
-        <form id='form' onSubmit={handleFormSubmit}>
-          {renderSearchSongInput()}
-          <button>Buscar</button>
-        </form>
-      </header>
-      <ul className='songs-container songs'>
-        {renderNotFoundMessage()}
-        {renderLoader()}
-        {songs.data && !loading
-          ? songs.data.map(({ artist: { name }, title }, index) =>
-              renderSongRow(name, title, index)
-            )
-          : renderLyrics()}
-        }
-      </ul>
+    <Routes />
+    // <Fragment>
+    //   <header>
+    //     <h1>Buscar letras</h1>
+    //     <form id='form' onSubmit={handleFormSubmit}>
+    //       {renderSearchSongInput()}
+    //       <button>Buscar</button>
+    //     </form>
+    //   </header>
+    //   <ul className='songs-container songs'>
+    //     {renderNotFoundMessage()}
+    //     {renderLoader()}
+    //     {songs.data && !loading
+    //       ? songs.data.map(({ artist: { name }, title }, index) =>
+    //           renderSongRow(name, title, index)
+    //         )
+    //       : renderLyrics()}
+    //     }
+    //   </ul>
 
-      <div className='prev-and-next-container'>
-        {renderPrevButton()}
-        {renderNextButton()}
-      </div>
-    </Fragment>
+    //   <div className='prev-and-next-container'>
+    //     {renderPrevButton()}
+    //     {renderNextButton()}
+    //   </div>
+    // </Fragment>
   );
 }
 
-export default App;
+export default memo(() => (
+  <MyProvider>
+    <App />
+  </MyProvider>
+));
 
-// TODO: refactor this shit, search how to use new features from ES2020
-// TODO: add routes? one for searched song rendering the list or warning message
-// one for lyrics, this without prev and next buttons and with a back button
-// TODO: check when getLyrics return 404, ex: VXCVxc, try catch?
+// TODO: search how to use new features from ES2020
