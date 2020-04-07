@@ -1,4 +1,11 @@
-import React, { useEffect, useContext, useState, memo, Fragment } from 'react';
+import React, {
+  useEffect,
+  useContext,
+  useState,
+  useCallback,
+  memo,
+  Fragment,
+} from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
 import { MyContext, types } from '../../App';
@@ -26,7 +33,7 @@ const Songs = () => {
       : setShowWarningMessage(true);
   };
 
-  const fetchSongs = async () => {
+  const fetchSongs = useCallback(async () => {
     setShowErrorMessage(false);
     try {
       if (searchedSong) {
@@ -44,11 +51,11 @@ const Songs = () => {
       setShowErrorMessage(true);
       dispatch({ type: types.loading, payload: false });
     }
-  };
+  }, [searchedSong, dispatch]);
 
   useEffect(() => {
     if (searchedSong) fetchSongs();
-  }, [searchedSong]);
+  }, [searchedSong, fetchSongs]);
 
   const ErrorMessage = ({ message }) => (
     <h3 className='warning-message'>{message}</h3>

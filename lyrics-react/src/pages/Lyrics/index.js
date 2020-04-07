@@ -1,4 +1,10 @@
-import React, { memo, useContext, useState, useEffect } from 'react';
+import React, {
+  memo,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import api from '../../services/api';
@@ -14,7 +20,7 @@ const Lyrics = () => {
 
   const { loading } = state;
 
-  const getLyrics = async () => {
+  const getLyrics = useCallback(async () => {
     dispatch({ type: types.loading, payload: true });
     try {
       const response = await api.get(`v1/${artist}/${song}`);
@@ -29,13 +35,12 @@ const Lyrics = () => {
       setLyrics('');
     }
     dispatch({ type: types.loading, payload: false });
-  };
+  }, [artist, song, dispatch]);
 
   useEffect(() => {
     if (artist && song) getLyrics();
-
     return () => setLyrics('');
-  }, []);
+  }, [artist, song, getLyrics]);
 
   const formatedLyrics = (text) => {
     if (!text) return <br></br>;

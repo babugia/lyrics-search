@@ -18,7 +18,7 @@ const Header = () => {
   );
 
   const handleKeyPress = (target) => {
-    if (target.charCode == 13) {
+    if (target.charCode === 13) {
       history.push(`/songs/${searchInput.trim()}`);
     }
   };
