@@ -9,9 +9,15 @@
   background-color: #10161b;
 }
 
-.buttons-container {
-  padding-bottom: 1rem;
-  text-align: center;
+.prev-and-next-container {
+  display: flex;
+  justify-content: center;
+}
+
+.prev-and-next-container button {
+  transform: scale(1.3);
+  margin: 15px;
+  margin-left: 2rem;
 }
 
 .btn {

@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState, memo, Fragment } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
 import { MyContext, types } from '../../App';
 import Loader from '../../utils/components/Loader';
@@ -14,7 +14,7 @@ const Songs = () => {
 
   const getMoreSongs = async (url) => {
     setShowWarningMessage(false);
-    dispatch({ type: types.loading });
+    dispatch({ type: types.loading, payload: true });
     const response = await api.get(
       `https://cors-anywhere.herokuapp.com/${url}`
     );
@@ -50,19 +50,14 @@ const Songs = () => {
     if (searchedSong) fetchSongs();
   }, [searchedSong]);
 
-  const handleLyricsButtonClicked = (artistName, songTitle) => {};
-
   const ErrorMessage = ({ message }) => (
     <h3 className='warning-message'>{message}</h3>
   );
 
   const LyricsButton = ({ artistName, songTitle }) => (
-    <button
-      className='btn'
-      onClick={() => handleLyricsButtonClicked(artistName, songTitle)}
-    >
-      Ver letra
-    </button>
+    <Link to={`/lyrics/${artistName}/${songTitle}`}>
+      <button className='btn'>Ver letra</button>
+    </Link>
   );
 
   const SongName = ({ artistName, songTitle }) => (
@@ -101,7 +96,7 @@ const Songs = () => {
         <ErrorMessage message='Nenhuma música encontrada, tente novamente!' />
       )}
       {showErrorMessage && (
-        <ErrorMessage message='Aconteceu algum problema.. Tente novamente em alguns instantes!' />
+        <ErrorMessage message='Aconteceu algum problema.. Tente novamente mais tarde!' />
       )}
       {songs.length && !loading && (
         <ul className='songs-container'>
@@ -115,7 +110,7 @@ const Songs = () => {
         </ul>
       )}
       {shouldRenderButtons && (
-        <div className='buttons-container'>
+        <div className='prev-and-next-container'>
           {prev && PrevButton()}
           {next && NextButton()}
         </div>

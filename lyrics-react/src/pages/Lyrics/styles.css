@@ -1,0 +1,16 @@
+.lyrics-container {
+  color: white;
+  text-align: center;
+  opacity: 0.4;
+}
+
+.lyrics {
+  margin-top: 20px;
+  line-height: 1.5;
+}
+
+.back-button {
+  cursor: pointer;
+  margin-top: 1rem;
+  margin-left: 1rem;
+}

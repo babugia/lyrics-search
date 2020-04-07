@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 import Header from './pages/Header';
 import Songs from './pages/Songs';
+import Lyrics from './pages/Lyrics';
 
 export default function Routes() {
   return (
@@ -11,14 +12,9 @@ export default function Routes() {
         <Header />
         <Switch>
           <Route path='/songs/:song' exact component={Songs} />
-          {/* <Route path='/incidents/new' component={NewIncident} /> */}
+          <Route path='/lyrics/:artist/:song' exact component={Lyrics} />
         </Switch>
       </div>
     </BrowserRouter>
   );
 }
-
-// TODO: /songs/:song
-
-// TODO: try to do /lyrics route with artistName and songTitle as parameter,
-// instead save them in redux
