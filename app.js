@@ -1,16 +1,46 @@
+const html = document.querySelector('html');
 const form = document.querySelector('#form');
+const checkbox = document.querySelector('input[name=theme]');
 const searchInput = document.querySelector('#search');
 const songsContainer = document.querySelector('#songs-container');
 const prevAndNextContainer = document.querySelector('#prev-and-next-container');
 
+const getStyle = (elem, style) =>
+  window.getComputedStyle(elem).getPropertyValue(style);
+
+const initialColors = {
+  bg: getStyle(html, '--bg'),
+  colorHeadings: getStyle(html, '--color-headings'),
+  colorText: getStyle(html, '--color-text'),
+};
+
+const darkMode = {
+  bg: '#10161b',
+  colorHeadings: '#8d56fd',
+  colorText: '#fff',
+};
+
+const transformKey = (key) =>
+  '--' + key.replace(/([A-Z])/, '-$1').toLowerCase();
+
+const changeColors = (colors) => {
+  Object.keys(colors).map((key) =>
+    html.style.setProperty(transformKey(key), colors[key])
+  );
+};
+
+checkbox.addEventListener('change', ({ target }) => {
+  target.checked ? changeColors(darkMode) : changeColors(initialColors);
+});
+
 const apiURL = `https://api.lyrics.ovh`;
 
-const fetchData = async url => {
+const fetchData = async (url) => {
   const response = await fetch(url);
   return await response.json();
 };
 
-const getMoreSongs = async url => {
+const getMoreSongs = async (url) => {
   const data = await fetchData(`https://cors-anywhere.herokuapp.com/${url}`);
   insertSongsIntoPage(data);
 };
@@ -30,7 +60,7 @@ const insertNextAndPrevButtons = ({ prev, next }) => {
       `;
 };
 
-const insertSongsIntoPage = songsInfo => {
+const insertSongsIntoPage = (songsInfo) => {
   const { data, prev, next } = songsInfo;
   songsContainer.innerHTML = data
     .map(
@@ -53,13 +83,13 @@ const insertSongsIntoPage = songsInfo => {
   prevAndNextContainer.innerHTML = ``;
 };
 
-const fetchSongs = async term => {
+const fetchSongs = async (term) => {
   const data = await fetchData(`${apiURL}/suggest/${term}`);
 
   insertSongsIntoPage(data);
 };
 
-const handleFormSubmit = event => {
+const handleFormSubmit = (event) => {
   event.preventDefault();
 
   const searchTerm = searchInput.value.trim();
@@ -91,7 +121,7 @@ const fetchLyrics = async (artist, songTitle) => {
   insertLyricsIntoPage({ lyrics, artist, songTitle });
 };
 
-const handleSongsContainerClick = event => {
+const handleSongsContainerClick = (event) => {
   const clickedElement = event.target;
   if (clickedElement.tagName === 'BUTTON') {
     const artist = clickedElement.getAttribute('data-artist');
